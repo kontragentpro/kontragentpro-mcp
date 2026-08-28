@@ -1,0 +1,28 @@
+[project]
+name = "kontragentpro-mcp"
+version = "0.2.0"
+description = "MCP-сервер KontragentPro — проверка контрагентов РФ (ЕГРЮЛ, ФНС, ЕФРСБ, санкции) прямо из Claude Desktop, Cursor и любого MCP-клиента."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "KontragentPro", email = "support@kontragentpro.ru" }]
+keywords = ["mcp", "kontragentpro", "egrul", "counterparty", "russia", "due-diligence"]
+dependencies = [
+    "mcp>=1.2.0",
+    "httpx>=0.27",
+]
+
+[project.urls]
+Homepage = "https://kontragentpro.ru"
+Documentation = "https://kontragentpro.ru/api/v2/docs"
+"API keys" = "https://kontragentpro.ru/developers"
+
+[project.scripts]
+kontragentpro-mcp = "kontragentpro_mcp.server:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["kontragentpro_mcp"]
