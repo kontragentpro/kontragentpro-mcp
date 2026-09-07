@@ -15,8 +15,9 @@
 """
 from __future__ import annotations
 
+import functools
 import os
-from typing import Annotated, Any, Optional
+from typing import Annotated, Any, Callable, Optional
 
 import httpx
 try:                                    # mcp 2.x
@@ -61,22 +62,67 @@ class ApiError(Exception):
     """Ошибка API v2, развёрнутая из единого конверта §6 в читаемый текст."""
 
 
+DEVELOPERS_URL = "https://kontragentpro.ru/developers"
+
+
 def _friendly(code: str, http: int, message: str) -> str:
+    """Развернуть код ошибки API в подсказку, которая говорит, что делать дальше.
+
+    Подсказки зависят от того, задан ли ключ: без ключа упереться в лимит легко
+    (5 запросов в минуту), и человеку нужен путь к ключу, а не констатация факта.
+    """
+    if API_KEY:
+        rate_hint = (
+            "Превышен лимит запросов в минуту для вашего ключа (60/мин, 1000/сутки). "
+            "Подождите минуту и повторите."
+        )
+    else:
+        rate_hint = (
+            "Анонимный доступ ограничен 5 запросами в минуту. Подождите минуту "
+            f"либо возьмите бесплатный ключ на {DEVELOPERS_URL} — с ним лимит "
+            "60 запросов в минуту и 1000 в сутки. Ключ передаётся серверу через "
+            "переменную окружения KONTRAGENTPRO_API_KEY."
+        )
     hints = {
-        "unauthorized": "Нужен API-ключ. Задайте KONTRAGENTPRO_API_KEY "
-        "(получить: https://kontragentpro.ru/developers).",
-        "forbidden": "У ключа нет нужного scope. Проверьте права ключа в ЛК.",
-        "insufficient_balance": "Недостаточно средств на депозите — пополните "
-        "баланс в личном кабинете.",
-        "rate_limited": "Превышен лимит запросов в минуту — сделайте паузу и "
-        "повторите (или используйте ключ для повышенного лимита).",
+        "unauthorized": (
+            f"Нужен API-ключ. Бесплатный выдаётся сразу на {DEVELOPERS_URL}; "
+            "задайте его в переменной окружения KONTRAGENTPRO_API_KEY."
+        ),
+        "forbidden": "У ключа нет нужного scope — проверьте права ключа в личном кабинете.",
+        "insufficient_balance": (
+            "Дневная бесплатная квота исчерпана. Платные тарифы пока не "
+            "подключены — напишите на ceo@kontragentpro.ru, поднимем лимит вручную."
+        ),
+        "rate_limited": rate_hint,
         "invalid_inn": "ИНН не проходит валидацию: для юрлица ожидается 10 цифр.",
+        "not_found": "Такого ИНН нет в наших данных — проверьте написание.",
     }
     hint = hints.get(code)
     parts = [f"[{code}, HTTP {http}] {message}"]
     if hint:
         parts.append(hint)
     return " ".join(parts)
+
+
+def _safe(fn: Callable) -> Callable:
+    """Отдавать ошибку API текстом в результате, а не исключением.
+
+    Зачем: под mcp 2.x исключение инструмента до клиента не доходит — модель
+    и пользователь видят только «Error executing tool <имя>», а все наши
+    подсказки умирают внутри. Проверено живым прогоном: на шестом анонимном
+    запросе приходило ровно это. Возвращая {"error": ...}, мы кладём текст
+    в обычный результат, и модель может его прочитать и объяснить человеку.
+
+    functools.wraps сохраняет сигнатуру и аннотации — FastMCP строит схему
+    инструмента по ним, поэтому обёртка должна быть прозрачной.
+    """
+    @functools.wraps(fn)
+    def wrapper(*args, **kwargs):
+        try:
+            return fn(*args, **kwargs)
+        except ApiError as e:
+            return {"error": str(e)}
+    return wrapper
 
 
 def _request(method: str, path: str, *,
@@ -118,6 +164,7 @@ def _request(method: str, path: str, *,
 # ---------------------------------------------------------------------------
 
 @mcp.tool()
+@_safe
 def search_companies(
     status: Annotated[Optional[str], Field(
         description="Фильтр по статусу: 'active' (действующие, по умолчанию) или "
@@ -154,6 +201,7 @@ def search_companies(
 
 
 @mcp.tool()
+@_safe
 def get_company(
     inn: Annotated[str, Field(description="ИНН юрлица — 10 цифр.")],
 ) -> dict:
@@ -165,6 +213,7 @@ def get_company(
 
 
 @mcp.tool()
+@_safe
 def get_company_financials(
     inn: Annotated[str, Field(description="ИНН юрлица — 10 цифр.")],
     year_from: Annotated[Optional[int], Field(
@@ -182,6 +231,7 @@ def get_company_financials(
 
 
 @mcp.tool()
+@_safe
 def get_company_timeline(
     inn: Annotated[str, Field(description="ИНН юрлица — 10 цифр.")],
 ) -> dict:
@@ -193,6 +243,7 @@ def get_company_timeline(
 
 
 @mcp.tool()
+@_safe
 def check_account() -> dict:
     """Состояние API-счёта по текущему ключу: баланс депозита, тарифный план,
     дневная квота и её использование, список ключей. Требует KONTRAGENTPRO_API_KEY."""
