@@ -1,3 +1,5 @@
+<!-- mcp-name: io.github.kontragentpro/kontragentpro-mcp -->
+
 # KontragentPro MCP server
 
 [![PyPI](https://img.shields.io/pypi/v/kontragentpro-mcp.svg)](https://pypi.org/project/kontragentpro-mcp/)

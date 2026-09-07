@@ -1,0 +1,34 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.kontragentpro/kontragentpro-mcp",
+  "title": "KontragentPro",
+  "description": "Russian company data by INN: registry, financials, bankruptcy, inspections, sanctions",
+  "version": "0.2.1",
+  "websiteUrl": "https://kontragentpro.ru",
+  "repository": {
+    "url": "https://github.com/kontragentpro/kontragentpro-mcp",
+    "source": "github",
+    "id": "1349663268"
+  },
+  "packages": [
+    {
+      "registryType": "pypi",
+      "registryBaseUrl": "https://pypi.org",
+      "identifier": "kontragentpro-mcp",
+      "version": "0.2.1",
+      "runtimeHint": "uvx",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "KONTRAGENTPRO_API_KEY",
+          "description": "Optional API key from https://kontragentpro.ru/developers. Without it the anonymous free tier is used.",
+          "isRequired": false,
+          "isSecret": true,
+          "format": "string"
+        }
+      ]
+    }
+  ]
+}
