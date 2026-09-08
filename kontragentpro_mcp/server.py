@@ -170,11 +170,14 @@ def search_companies(
         description="Фильтр по статусу: 'active' (действующие, по умолчанию) или "
         "'bankrupt' (в процедуре банкротства).")] = None,
     revenue_min: Annotated[Optional[int], Field(
-        description="Минимальная выручка за год в рублях (ГИР БО ФНС).", ge=0)] = None,
+        description="Минимальный годовой ДОХОД в рублях (открытые данные ФНС). "
+        "Это совокупные доходы — выручка плюс прочие, — а не строка 2110 "
+        "бухотчётности; они больше выручки из ГИР БО.", ge=0)] = None,
     revenue_max: Annotated[Optional[int], Field(
-        description="Максимальная выручка за год в рублях.", ge=0)] = None,
+        description="Максимальный годовой доход в рублях (открытые данные ФНС).",
+        ge=0)] = None,
     revenue_year: Annotated[int, Field(
-        description="Год финансового снимка для фильтра по выручке.",
+        description="Год годового снимка ФНС для фильтра по доходам.",
         ge=2018, le=2030)] = 2025,
     region_code: Annotated[Optional[str], Field(
         description="CSV кодов субъектов РФ (напр. '77,78') — для active.")] = None,
@@ -189,7 +192,7 @@ def search_companies(
                                 ge=1, le=500)] = 25,
     offset: Annotated[int, Field(description="Смещение для пагинации.", ge=0)] = 0,
 ) -> dict:
-    """Подобрать список российских юрлиц по фильтрам (выручка, регион, ОКВЭД,
+    """Подобрать список российских юрлиц по фильтрам (доходы, регион, ОКВЭД,
     штат, статус банкротства). Возвращает items[] с ИНН, названием, финансовыми
     показателями и флагами риска. Для деталей по одному ИНН зовите get_company."""
     return _request("GET", "/companies", params={

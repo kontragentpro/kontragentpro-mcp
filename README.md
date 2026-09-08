@@ -22,7 +22,7 @@ can try it in under a minute.
 
 | Tool | What it does |
 |---|---|
-| `search_companies` | Filter legal entities by revenue, region, industry code, headcount, bankruptcy status |
+| `search_companies` | Filter legal entities by annual income (FNS open data), region, industry code, headcount, bankruptcy status |
 | `get_company` | Full company card by INN in a single call |
 | `get_company_financials` | Multi-year financial history from official tax filings |
 | `get_company_timeline` | Event feed: bankruptcies, inspections, trademarks, official gazette |
@@ -105,7 +105,7 @@ sanctions lists. Each block on a company card carries its source and retrieval d
 Проверка российских контрагентов по ИНН прямо в **Claude Desktop, Cursor** и любом
 MCP-совместимом клиенте. Тонкая обёртка над публичным
 [API KontragentPro v2](https://kontragentpro.ru/api/v2/docs) — данные из открытых
-реестров: ЕГРЮЛ, ФНС (ГИР БО), ЕФРСБ (банкротства), Генпрокуратура (проверки),
+реестров: ЕГРЮЛ, ФНС (ГИР БО и открытые данные), ЕФРСБ (банкротства), Генпрокуратура (проверки),
 Роспатент, реестры санкций и иноагентов.
 
 **Ключ необязателен:** без него сервер работает в анонимном free-tier
@@ -117,9 +117,9 @@ MCP-совместимом клиенте. Тонкая обёртка над п
 
 | Инструмент | Что делает |
 |---|---|
-| `search_companies` | Подбор списка ЮЛ по фильтрам: выручка, регион, ОКВЭД, штат, статус банкротства |
+| `search_companies` | Подбор списка ЮЛ по фильтрам: годовой доход (открытые данные ФНС), регион, ОКВЭД, штат, статус банкротства |
 | `get_company` | Сводная карточка компании одним запросом по ИНН |
-| `get_company_financials` | Многолетняя финансовая динамика (ГИР БО ФНС) |
+| `get_company_financials` | Многолетняя динамика из ГИР БО ФНС; при её отсутствии — годовой снимок открытых данных ФНС |
 | `get_company_timeline` | Лента событий: банкротства, проверки, иноагенты, ТЗ, Вестник |
 | `check_account` | Баланс депозита, план, дневная квота (нужен ключ) |
 

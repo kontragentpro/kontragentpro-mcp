@@ -3,7 +3,7 @@
   "name": "io.github.kontragentpro/kontragentpro-mcp",
   "title": "KontragentPro",
   "description": "Russian company data by INN: registry, financials, bankruptcy, inspections, sanctions",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "websiteUrl": "https://kontragentpro.ru",
   "repository": {
     "url": "https://github.com/kontragentpro/kontragentpro-mcp",
@@ -15,7 +15,7 @@
       "registryType": "pypi",
       "registryBaseUrl": "https://pypi.org",
       "identifier": "kontragentpro-mcp",
-      "version": "0.2.2",
+      "version": "0.3.0",
       "runtimeHint": "uvx",
       "transport": {
         "type": "stdio"
